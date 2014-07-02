@@ -31,6 +31,7 @@ static void calcoffsets(void);
 static void cleanup(void);
 static char *cistrstr(const char *s, const char *sub);
 static void drawmenu(void);
+static void grabmouse(void);
 static void grabkeyboard(void);
 static void insert(const char *str, ssize_t n);
 static void keypress(XKeyEvent *ev);
@@ -129,11 +130,13 @@ main(int argc, char *argv[]) {
 
 	if(fast) {
 		grabkeyboard();
+		grabmouse();
 		readstdin();
 	}
 	else {
 		readstdin();
 		grabkeyboard();
+		grabmouse();
 	}
 	setup();
 	run();
@@ -238,6 +241,19 @@ drawmenu(void) {
         }
     }
 	mapdc(dc, win, mw, mh);
+}
+
+void grabmouse(void) {
+	int i;
+
+	/* try to grab mouse, we may have to wait for another process to ungrab */
+	for (i = 0; i < 100; i++) {
+		if (XGrabPointer(dc->dpy, DefaultRootWindow(dc->dpy), True, ButtonPressMask,
+		                 GrabModeAsync, GrabModeAsync, None, None, CurrentTime) == GrabSuccess)
+			return;
+		usleep(1000);
+	}
+	eprintf("cannot grab pointer\n");
 }
 
 void
@@ -429,8 +445,9 @@ buttonpress(XEvent *e) {
 	Item *item;
 	XButtonPressedEvent *ev = &e->xbutton;
 
+	/* left-click outside window: exit */
 	if(ev->window != win)
-		return;
+		exit(EXIT_FAILURE);
 
 	/* right-click: exit */
 	if(ev->button == Button3)
