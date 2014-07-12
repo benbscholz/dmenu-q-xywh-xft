@@ -65,7 +65,6 @@ static Atom clip, utf8;
 static Bool topbar = True;
 static Bool running = True;
 static int ret = 0;
-static Bool quiet = False;
 static DC *dc;
 static Item *items = NULL;
 static Item *matches, *matchend;
@@ -89,8 +88,6 @@ main(int argc, char *argv[]) {
 		}
 		else if(!strcmp(argv[i], "-b"))   /* appears at the bottom of the screen */
 			topbar = False;
- 		else if(!strcmp(argv[i], "-q"))
- 			quiet = True;
 		else if(!strcmp(argv[i], "-f"))   /* grabs keyboard before reading stdin */
 			fast = True;
 		else if(!strcmp(argv[i], "-i")) { /* case-insensitive item matching */
@@ -200,32 +197,30 @@ drawmenu(void) {
 	if((curpos = textnw(dc, text, cursor) + dc->font.height/2) < dc->w)
 		drawrect(dc, curpos, (dc->h - dc->font.height)/2 + 1, 1, dc->font.height -1, True, normcol->FG);
 
-    if(!quiet || strlen(text) > 0) {    
-        if(lines > 0) {
-            /* draw vertical list */
-            dc->w = mw - dc->x;
-            for(item = curr; item != next; item = item->right) {
-                dc->y += dc->h;
-                drawtext(dc, item->text, (item == sel) ? selcol : normcol);
-            }
-        }
-        else if(matches) {
-            /* draw horizontal list */
-            dc->x += inputw;
-            dc->w = textw(dc, "<");
-            if(curr->left)
-                drawtext(dc, "<", normcol);
-            for(item = curr; item != next; item = item->right) {
-                dc->x += dc->w;
-                dc->w = MIN(textw(dc, item->text), mw - dc->x - textw(dc, ">"));
-                drawtext(dc, item->text, (item == sel) ? selcol : normcol);
-            }
-            dc->w = textw(dc, ">");
-            dc->x = mw - dc->w;
-            if(next)
-                drawtext(dc, ">", normcol);
-        }
-    }
+  if(lines > 0) {
+      /* draw vertical list */
+      dc->w = mw - dc->x;
+      for(item = curr; item != next; item = item->right) {
+          dc->y += dc->h;
+          drawtext(dc, item->text, (item == sel) ? selcol : normcol);
+      }
+  }
+  else if(matches) {
+      /* draw horizontal list */
+      dc->x += inputw;
+      dc->w = textw(dc, "<");
+      if(curr->left)
+          drawtext(dc, "<", normcol);
+      for(item = curr; item != next; item = item->right) {
+          dc->x += dc->w;
+          dc->w = MIN(textw(dc, item->text), mw - dc->x - textw(dc, ">"));
+          drawtext(dc, item->text, (item == sel) ? selcol : normcol);
+      }
+      dc->w = textw(dc, ">");
+      dc->x = mw - dc->w;
+      if(next)
+          drawtext(dc, ">", normcol);
+  }
 	mapdc(dc, win, mw, mh);
 }
 
@@ -785,7 +780,7 @@ setup(void) {
 
 void
 usage(void) {
-	fputs("usage: dmenu [-b] [-q] [-f] [-i] [-l lines]\n"
+	fputs("usage: dmenu [-b] [-f] [-i] [-l lines]\n"
 	      "             [-x xoffset] [-y yoffset] [-h height] [-w width] [-v]\n", stderr);
 	exit(EXIT_FAILURE);
 }
