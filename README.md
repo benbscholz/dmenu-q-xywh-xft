@@ -8,3 +8,5 @@ Patches Applied
 [QXYW](http://github.com/baskerville/dmenu_qxyw)
 [Xft support](http://aur.archlinux.org/packages.php?ID=59497)
 [Height](http://aur.archlinux.org/packages.php?ID=59497)
+[Mouse support]
+[Xrdb support]
