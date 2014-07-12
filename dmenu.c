@@ -48,10 +48,9 @@ static void read_resources(void);
 
 static char text[BUFSIZ] = "";
 static int bh, mw, mh;
-static int inputw, promptw;
+static int inputw;
 static size_t cursor = 0;
 static const char *font = NULL;
-static const char *prompt = NULL;
 static const char *normbgcolor = NULL;
 static const char *normfgcolor = NULL;
 static const char *selbgcolor  = NULL;
@@ -111,8 +110,6 @@ main(int argc, char *argv[]) {
 			lines = atoi(argv[++i]);
 		else if(!strcmp(argv[i], "-h"))   /* minimum height of single line */
 			line_height = atoi(argv[++i]);
-		else if(!strcmp(argv[i], "-p"))   /* adds prompt to left of input field */
-			prompt = argv[++i];
 		else if(!strcmp(argv[i], "-fn"))  /* font or font set */
 			font = argv[++i];
 		else
@@ -160,7 +157,7 @@ calcoffsets(void) {
 	if(lines > 0)
 		n = lines * bh;
 	else
-		n = mw - (promptw + inputw + textw(dc, "<") + textw(dc, ">"));
+		n = mw - (inputw + textw(dc, "<") + textw(dc, ">"));
 	/* calculate which items will begin the next page and previous page */
 	for(i = 0, next = curr; next; next = next->right)
 		if((i += (lines > 0) ? bh : MIN(textw(dc, next->text), n)) > n)
@@ -199,11 +196,6 @@ drawmenu(void) {
 	dc->h = bh;
 	drawrect(dc, 0, 0, mw, mh, True, normcol->BG);
 
-	if(prompt && *prompt) {
-		dc->w = promptw;
-		drawtext(dc, prompt, selcol);
-		dc->x = dc->w;
-	}
 	/* draw input field */
 	dc->w = (lines > 0 || !matches) ? mw - dc->x : inputw;
 	drawtext(dc, text, normcol);
@@ -246,11 +238,6 @@ static void highlightmenu(XEvent *e) {
 	dc->x = 0;
 	dc->y = 0;
 	dc->h = bh;
-
-	if(prompt && *prompt) {
-		dc->w = promptw;
-		dc->x = dc->w;
-	}
 
 	if(lines > 0) {
 		/* vertical list: left-click on item */
@@ -498,10 +485,6 @@ buttonpress(XEvent *e) {
 	dc->y = 0;
 	dc->h = bh;
 
-	if(prompt && *prompt) {
-		dc->w = promptw;
-		dc->x = dc->w;
-	}
 	/* input field */
 	dc->w = (lines > 0 || !matches) ? mw - dc->x : inputw;
 	if((curpos = textnw(dc, text, cursor) + dc->h/2 - 2) < dc->w);
@@ -779,7 +762,6 @@ setup(void) {
 
 	x += xoffset;
 	mw = width ? width : mw;
-	promptw = (prompt && *prompt) ? textw(dc, prompt) : 0;
 	inputw = MIN(inputw, mw/3);
 	match();
 
@@ -805,7 +787,7 @@ setup(void) {
 
 void
 usage(void) {
-	fputs("usage: dmenu [-b] [-q] [-f] [-i] [-l lines] [-p prompt] [-fn font]\n"
+	fputs("usage: dmenu [-b] [-q] [-f] [-i] [-l lines] [-fn font]\n"
 	      "             [-x xoffset] [-y yoffset] [-h height] [-w width] [-v]\n", stderr);
 	exit(EXIT_FAILURE);
 }
