@@ -115,14 +115,6 @@ main(int argc, char *argv[]) {
 			prompt = argv[++i];
 		else if(!strcmp(argv[i], "-fn"))  /* font or font set */
 			font = argv[++i];
-		else if(!strcmp(argv[i], "-nb"))  /* normal background color */
-			normbgcolor = argv[++i];
-		else if(!strcmp(argv[i], "-nf"))  /* normal foreground color */
-			normfgcolor = argv[++i];
-		else if(!strcmp(argv[i], "-sb"))  /* selected background color */
-			selbgcolor = argv[++i];
-		else if(!strcmp(argv[i], "-sf"))  /* selected foreground color */
-			selfgcolor = argv[++i];
 		else
 			usage();
 
@@ -814,8 +806,7 @@ setup(void) {
 void
 usage(void) {
 	fputs("usage: dmenu [-b] [-q] [-f] [-i] [-l lines] [-p prompt] [-fn font]\n"
-	      "             [-x xoffset] [-y yoffset] [-h height] [-w width]\n"
-	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-v]\n", stderr);
+	      "             [-x xoffset] [-y yoffset] [-h height] [-w width] [-v]\n", stderr);
 	exit(EXIT_FAILURE);
 }
 
