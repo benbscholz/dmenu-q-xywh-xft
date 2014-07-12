@@ -110,8 +110,6 @@ main(int argc, char *argv[]) {
 			lines = atoi(argv[++i]);
 		else if(!strcmp(argv[i], "-h"))   /* minimum height of single line */
 			line_height = atoi(argv[++i]);
-		else if(!strcmp(argv[i], "-fn"))  /* font or font set */
-			font = argv[++i];
 		else
 			usage();
 
@@ -787,7 +785,7 @@ setup(void) {
 
 void
 usage(void) {
-	fputs("usage: dmenu [-b] [-q] [-f] [-i] [-l lines] [-fn font]\n"
+	fputs("usage: dmenu [-b] [-q] [-f] [-i] [-l lines]\n"
 	      "             [-x xoffset] [-y yoffset] [-h height] [-w width] [-v]\n", stderr);
 	exit(EXIT_FAILURE);
 }
