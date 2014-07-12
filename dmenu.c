@@ -31,6 +31,7 @@ static void calcoffsets(void);
 static void cleanup(void);
 static char *cistrstr(const char *s, const char *sub);
 static void drawmenu(void);
+static void highlightmenu(XEvent *e);
 static void grabmouse(void);
 static void grabkeyboard(void);
 static void insert(const char *str, ssize_t n);
@@ -241,6 +242,51 @@ drawmenu(void) {
         }
     }
 	mapdc(dc, win, mw, mh);
+}
+
+static void highlightmenu(XEvent *e) {
+	Item *item;
+	XButtonPressedEvent *ev = &e->xbutton;
+
+	dc->x = 0;
+	dc->y = 0;
+	dc->h = bh;
+
+	if(prompt && *prompt) {
+		dc->w = promptw;
+		dc->x = dc->w;
+	}
+
+	if(lines > 0) {
+		/* vertical list: left-click on item */
+		dc->w = mw - dc->x;
+		for(item = curr; item != next; item = item->right) {
+			dc->y += dc->h;
+			if(ev->y >= dc->y && ev->y <= (dc->y + dc->h)) {
+				if (item != sel) {
+					sel = item;
+					drawmenu();
+				}
+				return;
+			}
+		}
+	}
+	else {
+		/* horizontal list: left-click on item */
+		dc->w = inputw;
+		for(item = curr; item != next; item = item->right) {
+			dc->x += dc->w;
+			if(ev->x >= dc->x && ev->x <= (dc->x + dc->w)) {
+				if (item != sel) {
+					sel = item;
+					drawmenu();
+				}
+				return;
+			}
+		}
+	}
+
+	return;
 }
 
 void grabmouse(void) {
@@ -652,6 +698,9 @@ run(void) {
 		if(XFilterEvent(&ev, win))
 			continue;
 		switch(ev.type) {
+		case MotionNotify:
+			highlightmenu(&ev);
+			break;
 		case ButtonPress:
 			buttonpress(&ev);
 			break;
@@ -742,7 +791,8 @@ setup(void) {
 	/* create menu window */
 	swa.override_redirect = True;
 	swa.background_pixel = normcol->BG;
-	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask | ButtonPressMask;
+	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask
+	                              | ButtonPressMask | PointerMotionMask;
 	win = XCreateWindow(dc->dpy, root, x, y, mw, mh, 0,
 	                    DefaultDepth(dc->dpy, screen), CopyFromParent,
 	                    DefaultVisual(dc->dpy, screen),
